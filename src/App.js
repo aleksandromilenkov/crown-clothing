@@ -11,16 +11,45 @@ import "./App.css";
 import HomePage from "./pages/homepage/homepage.component";
 import ShopPage from "./pages/shop/shop.component";
 import Header from "./components/header/header.component";
+import SignInAndSignUp from "./pages/sign-in-and-sign-up/sign-in-and-sign-up.component";
+import { auth } from "./firebase/firebase.utils";
+import { useState, useEffect } from "react";
 const Hats = () => {
   return <h1>HATS PAGE</h1>;
 };
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  //let unsubscribeFromAuth = null;
+
+  // useEffect(() => {
+  //   unsubscribeFromAuth = auth.onAuthStateChanged((user) => {
+  //     setCurrentUser(user);
+  //   });
+  // }, currentUser);
+
+  // useEffect(() => {
+  //   return () => {
+  //     // Anything in here is fired on component unmount.
+  //     unsubscribeFromAuth();
+  //   };
+  // }, []);
+
+  useEffect(() => {
+    const unlisten = auth.onAuthStateChanged((authUser) => {
+      authUser ? setCurrentUser(authUser) : setCurrentUser(null);
+    });
+    return () => {
+      unlisten();
+    };
+  }, []);
   return (
     <div>
-      <Header />
+      <Header currentUser={currentUser} />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/shop" element={<ShopPage />} />
+        <Route path="/signin" element={<SignInAndSignUp />} />
       </Routes>
     </div>
   );
