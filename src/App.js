@@ -14,11 +14,12 @@ import Header from "./components/header/header.component";
 import SignInAndSignUp from "./pages/sign-in-and-sign-up/sign-in-and-sign-up.component";
 import { auth } from "./firebase/firebase.utils";
 import { useState, useEffect } from "react";
+import { createUserProfileDocument } from "./firebase/firebase.utils";
 const Hats = () => {
   return <h1>HATS PAGE</h1>;
 };
 function App() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState({});
 
   //let unsubscribeFromAuth = null;
 
@@ -36,8 +37,22 @@ function App() {
   // }, []);
 
   useEffect(() => {
-    const unlisten = auth.onAuthStateChanged((authUser) => {
-      authUser ? setCurrentUser(authUser) : setCurrentUser(null);
+    const unlisten = auth.onAuthStateChanged(async (authUser) => {
+      if (authUser) {
+        const userRef = await createUserProfileDocument(authUser);
+        userRef.onSnapshot((snapshot) => {
+          const user = {
+            id: snapshot.id,
+            ...snapshot.data(),
+          };
+          setCurrentUser(user);
+          console.log(user);
+        });
+      } else {
+        setCurrentUser(null);
+      }
+      console.log(currentUser);
+      //authUser ? setCurrentUser(authUser) : setCurrentUser(null);
     });
     return () => {
       unlisten();
